@@ -1,0 +1,35 @@
+Summit Tire Supply – Dealer Billing FAQ (demo data)
+
+Billing cycle
+- Invoices are generated the day an order ships and emailed to the dealer's billing contact.
+- Monthly statements summarizing all open invoices are sent on the 1st of each month.
+
+Payment terms
+- Standard terms are Net 30 from the invoice date.
+- Dealers in the Gold program receive Net 45 terms.
+- A 2% early-payment discount applies if paid within 10 days of the invoice date.
+- Payments are accepted through the dealer portal by ACH or card. Agents never take payment details by phone.
+- Payments can take up to 2 business days to post.
+
+Late payments
+- A 1.5% monthly late fee applies to balances more than 15 days past due.
+- Accounts more than 60 days past due are placed on credit hold, which pauses new orders until the balance is paid.
+
+Pricing and quotes
+- Invoice prices come from the dealer's approved quote at the time of order.
+- Prices for raw-material-sensitive products can be adjusted monthly; adjustments are announced 30 days in advance.
+- If an invoice price doesn't match the approved quote, the dealer can open a pricing dispute.
+
+Credits and returns
+- Approved returns are credited within 5 business days of the return being received at the warehouse.
+- Warranty credits are issued after the claim is approved, usually within 10 business days.
+- Credits appear on the next monthly statement and can be applied to any open invoice.
+
+Disputes
+- Dealers can dispute any invoice line within 60 days of the invoice date.
+- Opening a dispute pauses late fees on the disputed amount while it is reviewed.
+- Disputes are reviewed by the billing team within 5 business days, and the dealer receives an email with the outcome.
+
+Contact and escalation
+- Billing specialists are available Monday through Friday, 8 a.m. to 6 p.m. Central.
+- Issues over $5,000 or involving a credit hold are routed to a senior billing specialist.
