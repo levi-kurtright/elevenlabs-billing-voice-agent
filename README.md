@@ -1,6 +1,6 @@
 # Riley: Dealer Billing Voice Agent (ElevenLabs ElevenAgents)
 
-A voice AI agent that answers dealer billing questions for a fictional tire distributor, **Summit Tire Supply**. It's built on [ElevenLabs ElevenAgents](https://elevenlabs.io/) to explore how a guardrail-first design for enterprise service agents carries over from chat to voice.
+A voice AI agent that answers dealer billing questions for a fictional office products distributor, **Summit Office Supply**. It's built on [ElevenLabs ElevenAgents](https://elevenlabs.io/) to explore how a guardrail-first design for enterprise service agents carries over from chat to voice.
 
 All company names, policies and data here are fictional demo content.
 
@@ -27,7 +27,7 @@ Distributors that bill large dealer networks get a steady stream of routine bill
 - **Platform:** ElevenLabs ElevenAgents with a custom voice and English
 - **System prompt:** [`system_prompt.txt`](system_prompt.txt) covers personality, goal, call flow, guardrails and tone
 - **Knowledge base:** [`knowledge_base.txt`](knowledge_base.txt), billing policies indexed for retrieval (RAG)
-- **First message:** "Thanks for calling Summit Tire Supply billing, this is Riley. Can I get your dealer number and the invoice you're calling about?"
+- **First message:** "Thanks for calling Summit Office Supply billing, this is Riley. Can I get your dealer number and the invoice you're calling about?"
 
 ## Test scenarios (all passed in live voice testing)
 1. **Late fee question:** explains the 1.5% fee after 15 days past due

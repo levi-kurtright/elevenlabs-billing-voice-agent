@@ -1,4 +1,4 @@
-Summit Tire Supply – Dealer Billing FAQ (demo data)
+Summit Office Supply – Dealer Billing FAQ (demo data)
 
 Billing cycle
 - Invoices are generated the day an order ships and emailed to the dealer's billing contact.
@@ -17,7 +17,7 @@ Late payments
 
 Pricing and quotes
 - Invoice prices come from the dealer's approved quote at the time of order.
-- Prices for raw-material-sensitive products can be adjusted monthly; adjustments are announced 30 days in advance.
+- Prices for paper and toner products can be adjusted monthly; adjustments are announced 30 days in advance.
 - If an invoice price doesn't match the approved quote, the dealer can open a pricing dispute.
 
 Credits and returns
