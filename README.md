@@ -1,45 +1,54 @@
-# Riley: Dealer Billing Voice Agent (ElevenLabs ElevenAgents)
+# Riley: Dealer Billing Voice Agent on Stripe
 
-A voice AI agent that answers dealer billing questions for a fictional office products distributor, **Summit Office Supply**. It's built on [ElevenLabs ElevenAgents](https://elevenlabs.io/) to explore how a guardrail-first design for enterprise service agents carries over from chat to voice.
+A voice AI agent that answers dealer billing questions from **live Stripe data** and a governed knowledge base for a fictional office products distributor, **Summit Office Supply**. Riley looks up invoices and plans, explains metered usage and failed payments line by line, issues **Stripe credit notes within policy**, and logs a tracked follow-up whenever a person is needed.
 
-All company names, policies and data here are fictional demo content.
+Riley's sister agent is [Quinn](https://github.com/levi-kurtright/voice-quoting-agent), who quotes, sells, and changes plans. The two hand callers to each other, and they share one Stripe Billing service, which lives in [Quinn's repo](https://github.com/levi-kurtright/voice-quoting-agent/tree/main/service).
+
+All company names, dealers, policies and data are fictional. Stripe runs in **test mode**: real API calls, no real money.
 
 ## The problem
-Distributors that bill large dealer networks get a steady stream of routine billing calls. Callers ask why a late fee was charged, where a credit is, whether a payment posted, and why an invoice price doesn't match a quote. Most of these have clear, policy-based answers. A voice agent can resolve them in one call, and it must know when to stop and hand off to a person.
+Distributors that bill large dealer networks field a steady stream of routine billing calls: is my invoice paid, what do I owe, why was I charged this, why did my payment fail. Most have clear answers in policy and in the billing system. A voice agent can resolve them in one call, but only if it answers from real data, never guesses, and knows exactly where its authority ends.
 
 ## What Riley does
-- Greets the caller and collects the dealer number and invoice number
-- Answers questions about invoices, payment terms, early-payment discounts, late fees, credit holds, credits and returns
-- Explains how to dispute a price that doesn't match the approved quote, and what happens next
-- Keeps answers to two or three sentences, because it's a voice call
-- Hands off to a human when needed
+| Caller asks | Tool | Source of truth |
+|---|---|---|
+| "Is invoice X paid? What do I owe?" | `check_invoice_status` | Stripe invoices |
+| "What's on my plan? When's my next bill?" | `check_subscription` | Stripe subscriptions |
+| "How much have we printed this month?" | `check_print_usage` | Stripe Billing meters + invoice preview |
+| "Why is this invoice $103.20?" | `check_invoice_status` | Metered line items, explained in plain words |
+| "Why are we past due?" | `check_invoice_status` | Decline reason + Stripe's next retry date |
+| "Two cartridges arrived cracked" | `preview_credit` → `issue_credit` | Stripe credit notes |
+| Policy questions: late fees, disputes, credit holds | Knowledge base (RAG) | [`knowledge_base.txt`](knowledge_base.txt) |
+| Orders, quotes, plan changes | `transfer_to_agent` | Hands off to Quinn |
+| Anything needing a person | `log_follow_up` | Tracked ticket with a reference number |
 
 ## Guardrails
 | Rule | Why |
 |---|---|
-| Never takes card or bank numbers over the phone; directs callers to the dealer portal | Payment security |
-| Never promises a credit, refund or price change; can open a dispute and explain timing | Avoids commitments only finance can make |
-| Doesn't guess; if the answer isn't in the knowledge base, offers a transfer | Accuracy and trust |
-| Escalates upset callers or issues over $5,000 to a specialist | Protects high-value relationships |
-| Never discusses other dealers' accounts or pricing | Confidentiality |
+| Reads back Stripe's amounts, dates and statuses verbatim; never guesses | Accuracy and trust |
+| Credits: preview first, issue only on a clear yes, max $100 per invoice by phone (including earlier phone credits), never more than is owed, never a card refund | Small fixes on the call, finance controls the rest |
+| Never takes card or bank numbers; the account owner updates the card or pays online | Payment security |
+| Usage projections are always labeled as estimates | No promises about a bill that isn't final |
+| Every "a specialist will follow up" is logged first, with a reference number | Nothing promised on a call gets lost |
+| Escalates upset callers or issues over $5,000 | Protects high-value relationships |
+| Never discusses other dealers' accounts | Confidentiality |
+
+## Verified results (Stripe test mode)
+- Dealer D-1042 → "1 open invoice, $332.50, due December 6"; CPGODWZY-0001 → "paid in full"
+- $30 damaged-goods credit → previewed $74.69 → $44.69, issued only after "go ahead"; a retry didn't credit twice; $150 → specialist
+- Print usage → 9,466 pages, 4,466 over the allowance, $53.59 overage, matching Stripe's invoice preview ($102.59) to the cent
+- Test clock month-end → explains invoice SJ0HSXCP-0002: "13,600 pages: 5,000 included, and 8,600 at 1.2 cents a page, for $103.20"
+- Card declined at renewal → explains the decline and the Nov 3 retry; after the card was updated, Stripe's retry succeeded and the subscription went from past due back to active
 
 ## How it's built
-- **Platform:** ElevenLabs ElevenAgents with a custom voice and English
-- **System prompt:** [`system_prompt.txt`](system_prompt.txt) covers personality, goal, call flow, guardrails and tone
-- **Knowledge base:** [`knowledge_base.txt`](knowledge_base.txt), billing policies indexed for retrieval (RAG)
+- **Platform:** ElevenLabs ElevenAgents, Claude Haiku 5.5 as the LLM
+- **System prompt:** [`system_prompt.txt`](system_prompt.txt), exported from the live agent
+- **Tools:** [`tools/`](tools), ElevenLabs webhook tool definitions (replace `YOUR-STRIPE-VAL` with your service URL)
+- **Knowledge base:** [`knowledge_base.txt`](knowledge_base.txt), billing policies indexed for retrieval
 - **First message:** "Thanks for calling Summit Office Supply billing, this is Riley. Can I get your dealer number and the invoice you're calling about?"
 
-## Test scenarios (all passed in live voice testing)
-1. **Late fee question:** explains the 1.5% fee after 15 days past due
-2. **Price doesn't match quote:** explains the 60-day dispute window, and that late fees pause during review
-3. **Caller offers a card number:** declines and points to the dealer portal
-4. **Frustrated caller with a $12,000 issue:** offers a transfer to a billing specialist
-5. **Interruption mid-sentence:** stops, listens and responds naturally
+## Testing
+Five automated ElevenLabs tests cover Riley: balance lookup, hand-off to Quinn, damaged-goods credit, print usage, and failed payment with a logged follow-up. Every real call is also scored for "no money moves without a yes," "numbers only from tools," and correct routing. Details in [Quinn's TESTS.md](https://github.com/levi-kurtright/voice-quoting-agent/blob/main/TESTS.md).
 
 ## What I took away
-The same design I used for a production chat-based service agent carried directly to voice: a narrow, well-defined job, answers grounded in a knowledge base, and explicit guardrails with a clear handoff. Voice raises the bar on brevity and turn-taking, and ElevenLabs handled both well.
-
-## Next steps
-- Add a tool call to look up live invoice status from a billing system API
-- Add a transfer-to-human tool with context handoff
-- Track resolution rate and escalation rate in post-call analysis
+The design that worked for a production chat service agent carries to voice and to money: a narrow job, answers grounded in a system of record, explicit limits, and a clean hand-off. Voice raises the bar on brevity. Billing raises it on verifiability. Every number has to trace back to Stripe.

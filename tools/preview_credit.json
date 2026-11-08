@@ -1,0 +1,94 @@
+{
+  "type": "webhook",
+  "name": "preview_credit",
+  "description": "Previews a credit note on an invoice and checks it against phone credit policy. Writes nothing. Call it when a caller asks for a credit because of damaged or defective items, the wrong item, a short shipment, a pricing error, or a duplicate charge. Read back the spoken_summary word for word. If can_credit is true, ask the caller to confirm before calling issue_credit. If needs_specialist is true, tell the caller a specialist will follow up and do not issue anything.",
+  "disable_interruptions": false,
+  "interruption_mode": "allow",
+  "force_pre_tool_speech": false,
+  "pre_tool_speech": "auto",
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "tool_error_handling_mode": "auto",
+  "execution_mode": "immediate",
+  "follow_redirects": false,
+  "follow_redirects_allowed_domains": [],
+  "api_schema": {
+    "url": "https://YOUR-STRIPE-VAL.web.val.run/credit/preview",
+    "method": "POST",
+    "path_params_schema": [],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "Request body",
+      "properties": [
+        {
+          "id": "invoice_number",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "The Stripe invoice number the credit is for, for example G1O1OVID-0004",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "amount",
+          "type": "number",
+          "value_type": "llm_prompt",
+          "description": "The credit amount in US dollars that the caller asked for, for example 25 or 49.50",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "reason",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "The reason category that best matches what the caller described",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": [
+            "damaged",
+            "defective",
+            "not_satisfied",
+            "wrong_item",
+            "short_shipped",
+            "pricing_error",
+            "duplicate_charge"
+          ],
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "note",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "A short factual note of what the caller reported, for example 2 toner cartridges arrived cracked",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": false
+        }
+      ],
+      "required": false,
+      "dynamic_variable": "",
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [],
+    "content_type": "application/json",
+    "auth_connection": null,
+    "mtls_auth_connection": null,
+    "response_filter": null
+  },
+  "assignments": [],
+  "response_timeout_secs": 30,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  },
+  "response_mocks": []
+}
