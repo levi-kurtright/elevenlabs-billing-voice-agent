@@ -14,6 +14,7 @@ Distributors that bill large dealer networks field a steady stream of routine bi
 |---|---|---|
 | "Is invoice X paid? What do I owe?" | `check_invoice_status` | Stripe invoices |
 | "What's on my plan? When's my next bill?" | `check_subscription` | Stripe subscriptions |
+| "What does our plan include? Do we get repair service?" | `check_plan_features` | Stripe Entitlements features on the dealer's products, plus what the bigger print plan adds |
 | "How much have we printed this month?" | `check_print_usage` | Stripe Billing meters + invoice preview |
 | "Why is this invoice $103.20?" | `check_invoice_status` | Metered line items, explained in plain words |
 | "Why are we past due?" | `check_invoice_status` | Decline reason + Stripe's next retry date |
@@ -22,7 +23,7 @@ Distributors that bill large dealer networks field a steady stream of routine bi
 | "How much print credit do we have?" | `check_print_credits` | Stripe Billing credit balance |
 | "Two cartridges arrived cracked" | `preview_credit` → `issue_credit` | Stripe credit notes |
 | Policy questions: late fees, disputes, credit holds | Knowledge base (RAG) | [`knowledge_base.txt`](knowledge_base.txt) |
-| Orders, quotes, plan changes | `transfer_to_agent` | Hands off to Quinn |
+| Orders, quotes, plan changes, pausing a toner subscription | `transfer_to_agent` | Hands off to Quinn |
 | Anything needing a person | `log_follow_up` | Tracked ticket with a reference number |
 
 ## Guardrails
@@ -45,6 +46,7 @@ Distributors that bill large dealer networks field a steady stream of routine bi
 - Card declined at renewal → explains the decline and Stripe's next retry; after the card was updated, Riley had Stripe retry on the call, it was paid, and a Stripe webhook closed the open follow-up automatically
 - "I want to pay CPGODWZY-0002" → Stripe emailed the hosted payment page for $332.50 to the billing contact on file
 - Prepaid print credit → $100 available; Stripe's next-invoice estimate drops to $0.00 "after $53.59 of your prepaid print credit"
+- "What does our plan include?" (Lakeside, D-2001) → read from Stripe Entitlements: the 5K plan includes 5,000 pages a month, toner, and next-business-day printer repair; the 25K plan adds same-day repair and a quarterly usage review
 
 ## How it's built
 - **Platform:** ElevenLabs ElevenAgents, Claude Haiku 5.5 as the LLM
@@ -54,7 +56,7 @@ Distributors that bill large dealer networks field a steady stream of routine bi
 - **First message:** "Thanks for calling Summit Office Supply billing, this is Riley. Can I get your dealer number and the invoice you're calling about?"
 
 ## Testing
-Eight automated ElevenLabs tests cover Riley: balance lookup, hand-off to Quinn, damaged-goods credit, print usage, failed payment with a logged follow-up, payment link instead of a card number, and card retry (reads back first, runs only after a yes). Every real call is also scored for "no money moves without a yes," "numbers only from tools," and correct routing. Details in [Quinn's TESTS.md](https://github.com/levi-kurtright/voice-quoting-agent/blob/main/TESTS.md).
+Nine automated ElevenLabs tests cover Riley: balance lookup, hand-off to Quinn, damaged-goods credit, print usage, failed payment with a logged follow-up, payment link instead of a card number, card retry (reads back first, runs only after a yes), and plan features from Stripe Entitlements. Every real call is also scored for "no money moves without a yes," "numbers only from tools," and correct routing. Details in [Quinn's TESTS.md](https://github.com/levi-kurtright/voice-quoting-agent/blob/main/TESTS.md).
 
 ## What I took away
 The design that worked for a production chat service agent carries to voice and to money: a narrow job, answers grounded in a system of record, explicit limits, and a clean hand-off. Voice raises the bar on brevity. Billing raises it on verifiability. Every number has to trace back to Stripe.
